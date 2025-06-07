@@ -178,8 +178,8 @@ class AnimatedCardStackView @JvmOverloads constructor(
             
             // Calculate target rotation - reduced fan spread for better spacing
             val targetRotation = if (isRotated) {
-                val angleStep = if (cardCount > 1) 90f / (cardCount - 1) else 0f  // Reduced from 180° to 90°
-                -45f + (index * angleStep)  // Range from -45° to +45°
+                val angleStep = if (cardCount > 1) 180f / (cardCount - 1) else 0f  // Reduced from 180° to 90°
+                -90f + (index * angleStep)  // Range from -45° to +45°
             } else {
                 baseRotation
             }
