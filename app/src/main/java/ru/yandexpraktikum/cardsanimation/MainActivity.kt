@@ -230,17 +230,9 @@ fun AnimatedStackCard(
         label = "card_rotation_$cardIndex"
     )
     
-    // Create fan effect like cards held in hand - pivot from bottom center
-    val pivotDistance = 100f // Distance from bottom pivot point to card center
-    val angleInRadians = Math.toRadians(baseRotation.toDouble())
-    
-    // Calculate target position to create narrow bottom grip area and fanned top
-    val targetOffsetX = -(pivotDistance * Math.sin(angleInRadians)).toInt()
-    val targetOffsetY = -(cardIndex * 24) // Convert dp to pixels (approximately 8dp * 3 density)
-    
-    // Animate the position using IntOffset
+    // All cards positioned at the same location - rotation creates the fan (like View version)
     val animatedOffset by animateIntOffsetAsState(
-        targetValue = IntOffset(targetOffsetX, targetOffsetY),
+        targetValue = IntOffset(0, 0), // All cards at center position
         animationSpec = tween(durationMillis = 300),
         label = "card_position_$cardIndex"
     )
