@@ -88,14 +88,19 @@ fun CardStack(cardCount: Int) {
                     val horizontalMovement = dragAmount.x
                     val verticalMovement = dragAmount.y
                     
-                    // Always handle vertical movement for fan animation
-                    handleVerticalSwipe(
-                        verticalMovement = verticalMovement,
-                        onVerticalDrag = { verticalDistance -> dragOffset += verticalDistance }
-                    )
-                    
-                    // Only handle horizontal swipes when movement is primarily horizontal
+                    // Determine swipe direction
                     val isHorizontalSwipe = kotlin.math.abs(horizontalMovement) > kotlin.math.abs(verticalMovement)
+                    val isVerticalSwipe = kotlin.math.abs(verticalMovement) > kotlin.math.abs(horizontalMovement)
+                    
+                    // Only handle vertical swipes for fan animation
+                    if (isVerticalSwipe) {
+                        handleVerticalSwipe(
+                            verticalMovement = verticalMovement,
+                            onVerticalDrag = { verticalDistance -> dragOffset += verticalDistance }
+                        )
+                    }
+                    
+                    // Only handle horizontal swipes for card cycling
                     if (isHorizontalSwipe) {
                         handleHorizontalSwipe(
                             horizontalMovement = horizontalMovement,
