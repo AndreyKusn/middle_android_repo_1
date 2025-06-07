@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,12 +21,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.yandexpraktikum.cardsanimation.ui.theme.CardsAnimationTheme
-import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,28 +57,17 @@ fun AnimatedCardScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedCard()
+        CardStack(cardCount = 5)
     }
 }
 
 @Composable
-fun AnimatedCard() {
+fun CardStack(cardCount: Int) {
     var isRotated by remember { mutableStateOf(false) }
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     
-    // Animate the rotation based on the state
-    val animatedRotationZ by animateFloatAsState(
-        targetValue = if (isRotated) 45f else 0f,
-        animationSpec = tween(durationMillis = 300),
-        label = "card_rotation"
-    )
-    
-    Card(
+    Box(
         modifier = Modifier
-            .size(width = 280.dp, height = 200.dp)
-            .graphicsLayer {
-                rotationZ = animatedRotationZ
-            }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
@@ -97,11 +84,62 @@ fun AnimatedCard() {
                     dragOffset += dragAmount.y
                 }
             },
+        contentAlignment = Alignment.Center
+    ) {
+        // Create cards from bottom to top (reverse order for proper layering)
+        for (i in cardCount - 1 downTo 0) {
+            AnimatedStackCard(
+                cardIndex = i,
+                isRotated = isRotated,
+                baseRotation = i * 12f // Each card rotated 12 degrees more for better fan effect
+            )
+        }
+    }
+}
+
+@Composable
+fun AnimatedStackCard(
+    cardIndex: Int,
+    isRotated: Boolean,
+    baseRotation: Float
+) {
+    // Calculate final rotation: base rotation + additional rotation when swiped
+    val targetRotation = baseRotation + if (isRotated) 45f else 0f
+    
+    // Animate the rotation based on the state
+    val animatedRotationZ by animateFloatAsState(
+        targetValue = targetRotation,
+        animationSpec = tween(durationMillis = 300),
+        label = "card_rotation_$cardIndex"
+    )
+    
+    // Create fan effect like cards held in hand - expose upper portion of each card
+    val fanRadius = 120f // Radius of the fan arc
+    val angleInRadians = Math.toRadians(baseRotation.toDouble())
+    
+    // Calculate position based on fan arc - cards spread out horizontally and slightly vertically
+    val offsetX = (fanRadius * Math.sin(angleInRadians) * 0.6).dp // Horizontal spread
+    val offsetY = (cardIndex * 8 - fanRadius * Math.cos(angleInRadians) * 0.3).dp // Vertical offset to show upper parts
+    
+    Card(
+        modifier = Modifier
+            .size(width = 280.dp, height = 200.dp)
+            .graphicsLayer {
+                rotationZ = animatedRotationZ
+                translationX = offsetX.toPx()
+                translationY = offsetY.toPx()
+            },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = when (cardIndex % 3) {
+                0 -> MaterialTheme.colorScheme.primaryContainer
+                1 -> MaterialTheme.colorScheme.secondaryContainer
+                else -> MaterialTheme.colorScheme.tertiaryContainer
+            }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = (4 + cardIndex * 1).dp // Subtle elevation increase
+        )
     ) {
         Column(
             modifier = Modifier
@@ -110,29 +148,47 @@ fun AnimatedCard() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Card rank/number - positioned at top for visibility in fan
             Text(
-                text = "🎴",
-                fontSize = 48.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Text(
-                text = "Animated Card",
-                fontSize = 24.sp,
+                text = when (cardIndex % 5) {
+                    0 -> "A"
+                    1 -> "K"
+                    2 -> "Q"
+                    3 -> "J"
+                    else -> "${cardIndex + 7}"
+                },
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = when (cardIndex % 3) {
+                    0 -> MaterialTheme.colorScheme.onPrimaryContainer
+                    1 -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MaterialTheme.colorScheme.onTertiaryContainer
+                },
+                modifier = Modifier.padding(bottom = 8.dp)
             )
+            
+            // Card suit - centered
             Text(
-                text = "Swipe up to rotate!",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                modifier = Modifier.padding(top = 8.dp)
+                text = when (cardIndex % 4) {
+                    0 -> "♠️"
+                    1 -> "♥️"
+                    2 -> "♦️"
+                    else -> "♣️"
+                },
+                fontSize = 40.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
+            
+            // Rotation info - smaller and at bottom
             Text(
-                text = if (isRotated) "Rotated 45°" else "Normal Position",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = 12.dp)
+                text = "${animatedRotationZ.toInt()}°",
+                fontSize = 10.sp,
+                color = when (cardIndex % 3) {
+                    0 -> MaterialTheme.colorScheme.primary
+                    1 -> MaterialTheme.colorScheme.secondary
+                    else -> MaterialTheme.colorScheme.tertiary
+                },
+                fontWeight = FontWeight.Medium
             )
         }
     }
