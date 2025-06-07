@@ -57,7 +57,7 @@ fun AnimatedCardScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CardStack(cardCount = 5)
+        CardStack(cardCount = 4)
     }
 }
 
@@ -100,6 +100,7 @@ fun CardStack(cardCount: Int) {
             
             AnimatedStackCard(
                 cardIndex = i,
+                totalCards = cardCount,
                 isRotated = isRotated,
                 baseRotation = baseRotation
             )
@@ -110,11 +111,18 @@ fun CardStack(cardCount: Int) {
 @Composable
 fun AnimatedStackCard(
     cardIndex: Int,
+    totalCards: Int,
     isRotated: Boolean,
     baseRotation: Float
 ) {
-    // Calculate final rotation: base rotation + additional rotation when swiped
-    val targetRotation = baseRotation + if (isRotated) 45f else 0f
+    // Calculate final rotation: base rotation or dramatic fan spread when swiped
+    val targetRotation = if (isRotated) {
+        // When swiped up: equally distribute cards across 180° fan
+        val angleStep = if (totalCards > 1) 180f / (totalCards - 1) else 0f
+        -90f + (cardIndex * angleStep) // Distribute from -90° to +90°
+    } else {
+        baseRotation // Use natural hand-held positions
+    }
     
     // Animate the rotation based on the state
     val animatedRotationZ by animateFloatAsState(
