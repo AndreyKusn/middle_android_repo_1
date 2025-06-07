@@ -85,20 +85,25 @@ fun CardStack(cardCount: Int) {
                     }
                 ) { _, dragAmount ->
                     // This runs while user is dragging their finger
-                    // Handle vertical swipes (for fan animation)
+                    val horizontalMovement = dragAmount.x
+                    val verticalMovement = dragAmount.y
+                    
+                    // Always handle vertical movement for fan animation
                     handleVerticalSwipe(
-                        verticalMovement = dragAmount.y,
+                        verticalMovement = verticalMovement,
                         onVerticalDrag = { verticalDistance -> dragOffset += verticalDistance }
                     )
                     
-                    // Handle horizontal swipes (for card cycling)
-                    handleHorizontalSwipe(
-                        horizontalMovement = dragAmount.x,
-                        verticalMovement = dragAmount.y,
-                        currentCardOffset = cardOffset,
-                        cardCount = cardCount,
-                        onCardCycle = { newCardOffset -> cardOffset = newCardOffset }
-                    )
+                    // Only handle horizontal swipes when movement is primarily horizontal
+                    val isHorizontalSwipe = kotlin.math.abs(horizontalMovement) > kotlin.math.abs(verticalMovement)
+                    if (isHorizontalSwipe) {
+                        handleHorizontalSwipe(
+                            horizontalMovement = horizontalMovement,
+                            currentCardOffset = cardOffset,
+                            cardCount = cardCount,
+                            onCardCycle = { newCardOffset -> cardOffset = newCardOffset }
+                        )
+                    }
                 }
             },
         contentAlignment = Alignment.Center
@@ -271,22 +276,18 @@ fun handleVerticalSwipe(
 
 /**
  * Handles horizontal finger movement for card cycling
- * Similar to handling X-axis in GestureDetector.OnGestureListener.onScroll()
+ * Simple horizontal-only detection (like checking X movement in View)
  */
 fun handleHorizontalSwipe(
     horizontalMovement: Float,
-    verticalMovement: Float,
     currentCardOffset: Int,
     cardCount: Int,
     onCardCycle: (Int) -> Unit
 ) {
-    val swipeThreshold = 20f
+    val swipeThreshold = 30f // Increased threshold to avoid accidental triggers
     
-    // Only process if this is primarily a horizontal movement
-    val isHorizontalSwipe = kotlin.math.abs(horizontalMovement) > kotlin.math.abs(verticalMovement)
-    val isSignificantSwipe = kotlin.math.abs(horizontalMovement) > swipeThreshold
-    
-    if (isHorizontalSwipe && isSignificantSwipe) {
+    // Simple check: is horizontal movement significant enough?
+    if (kotlin.math.abs(horizontalMovement) > swipeThreshold) {
         if (horizontalMovement > 0) {
             // Swipe right = move bottom card to top (like flipping through deck)
             val newOffset = (currentCardOffset + 1) % cardCount
