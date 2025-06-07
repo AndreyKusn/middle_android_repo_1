@@ -184,18 +184,22 @@ class AnimatedCardStackView @JvmOverloads constructor(
                 baseRotation
             }
             
-            // Calculate position - reduced pivot distance for tighter fan
-            val pivotDistance = 60f  // Reduced from 100f for tighter spacing
-            val angleInRadians = Math.toRadians(baseRotation.toDouble())
-            val targetX = -(pivotDistance * sin(angleInRadians)).toFloat()
-            val targetY = -(index * 16).toFloat()  // Reduced vertical spacing
+            // Calculate the shared position for all cards (center of container)
+            val cardWidth = 100f * resources.displayMetrics.density
+            val cardHeight = 160f * resources.displayMetrics.density
+            val sharedX = width / 2f - cardWidth / 2f
+            val sharedY = height / 2f - cardHeight / 2f
             
-            // Apply animations
+            // Position all cards at the exact same location
+            cardView.x = sharedX
+            cardView.y = sharedY
+            
+            // Set the same pivot point for all cards (bottom center of the card position)
+            cardView.pivotX = cardWidth / 2f
+            cardView.pivotY = cardHeight
+            
+            // Apply rotation animation
             cardView.animateToRotation(targetRotation)
-            cardView.animateToPosition(
-                width / 2f + targetX - cardView.width / 2f,
-                height / 2f + targetY - cardView.height / 2f
-            )
         }
     }
 
