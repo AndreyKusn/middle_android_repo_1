@@ -39,6 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.yandexpraktikum.cardsanimation.ui.theme.CardsAnimationTheme
 
+// Card data structure
+data class CardData(
+    val rank: String,
+    val suit: String,
+    val color: androidx.compose.ui.graphics.Color
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,12 +68,19 @@ fun AnimatedCardScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CardStack(cardCount = 4)
+        val cards = listOf(
+            CardData("A", "♠️", MaterialTheme.colorScheme.onPrimaryContainer),
+            CardData("K", "♥️", MaterialTheme.colorScheme.onSecondaryContainer),
+            CardData("Q", "♦️", MaterialTheme.colorScheme.onTertiaryContainer),
+            CardData("J", "♣️", MaterialTheme.colorScheme.onPrimaryContainer)
+        )
+        CardStack(cards = cards)
     }
 }
 
 @Composable
-fun CardStack(cardCount: Int) {
+fun CardStack(cards: List<CardData>) {
+    val cardCount = cards.size
     var isRotated by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var cardOffset by remember { mutableIntStateOf(0) } // Track which card is on top
@@ -117,6 +131,7 @@ fun CardStack(cardCount: Int) {
         for (i in cardCount - 1 downTo 0) {
             // Calculate actual card index after cycling
             val actualCardIndex = (i + cardOffset) % cardCount
+            val cardData = cards[actualCardIndex]
             
             // Natural fan rotation pattern - distribute cards across 90° span
             val baseRotation = if (cardCount > 1) {
@@ -128,22 +143,51 @@ fun CardStack(cardCount: Int) {
             
             AnimatedStackCard(
                 cardIndex = i,
-                actualCardIndex = actualCardIndex,
                 totalCards = cardCount,
                 isRotated = isRotated,
-                baseRotation = baseRotation
+                baseRotation = baseRotation,
+                cardContent = {
+                    PlayingCard(cardData = cardData)
+                }
             )
         }
     }
 }
 
 @Composable
+fun PlayingCard(cardData: CardData) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Card rank/number - positioned at top for visibility in fan
+        Text(
+            text = cardData.rank,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = cardData.color,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        // Card suit - centered
+        Text(
+            text = cardData.suit,
+            fontSize = 40.sp,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+    }
+}
+
+@Composable
 fun AnimatedStackCard(
     cardIndex: Int,
-    actualCardIndex: Int,
     totalCards: Int,
     isRotated: Boolean,
-    baseRotation: Float
+    baseRotation: Float,
+    cardContent: @Composable () -> Unit
 ) {
     // Calculate final rotation: base rotation or dramatic fan spread when swiped
     val targetRotation = if (isRotated) {
@@ -186,7 +230,7 @@ fun AnimatedStackCard(
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = when (actualCardIndex % 3) {
+            containerColor = when (cardIndex % 3) {
                 0 -> MaterialTheme.colorScheme.primaryContainer
                 1 -> MaterialTheme.colorScheme.secondaryContainer
                 else -> MaterialTheme.colorScheme.tertiaryContainer
@@ -196,52 +240,24 @@ fun AnimatedStackCard(
             defaultElevation = (4 + cardIndex * 1).dp // Subtle elevation increase
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        // Use the provided card content
+        cardContent()
+        
+        // Optional: Add rotation info overlay
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            // Card rank/number - positioned at top for visibility in fan
-            Text(
-                text = when (actualCardIndex % 5) {
-                    0 -> "A"
-                    1 -> "K"
-                    2 -> "Q"
-                    3 -> "J"
-                    else -> "${actualCardIndex + 7}"
-                },
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = when (actualCardIndex % 3) {
-                    0 -> MaterialTheme.colorScheme.onPrimaryContainer
-                    1 -> MaterialTheme.colorScheme.onSecondaryContainer
-                    else -> MaterialTheme.colorScheme.onTertiaryContainer
-                },
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Text(
-                text = when (actualCardIndex % 4) {
-                    0 -> "♠️"
-                    1 -> "♥️"
-                    2 -> "♦️"
-                    else -> "♣️"
-                },
-                fontSize = 40.sp,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            
-            // Rotation info - smaller and at bottom
             Text(
                 text = "${animatedRotationZ.toInt()}°",
                 fontSize = 10.sp,
-                color = when (actualCardIndex % 3) {
+                color = when (cardIndex % 3) {
                     0 -> MaterialTheme.colorScheme.primary
                     1 -> MaterialTheme.colorScheme.secondary
                     else -> MaterialTheme.colorScheme.tertiary
                 },
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
         }
     }
@@ -310,5 +326,15 @@ fun handleHorizontalSwipe(
 fun AnimatedCardPreview() {
     CardsAnimationTheme {
         AnimatedCardScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PlayingCardPreview() {
+    CardsAnimationTheme {
+        PlayingCard(
+            cardData = CardData("A", "♠️", MaterialTheme.colorScheme.onPrimaryContainer)
+        )
     }
 }
