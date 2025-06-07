@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CardsAnimation"
         tools:targetApi="31">
+        <activity android:name=".XmlViewActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+
+
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true"

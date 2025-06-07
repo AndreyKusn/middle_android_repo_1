@@ -37,6 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import ru.yandexpraktikum.cardsanimation.ui.theme.CardsAnimationTheme
 
 // Card data structure
@@ -64,17 +68,38 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AnimatedCardScreen(modifier: Modifier = Modifier) {
-    Box(
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
+    Column(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "Compose Version",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
         val cards = listOf(
             CardData("A", "♠️", MaterialTheme.colorScheme.onPrimaryContainer),
             CardData("K", "♥️", MaterialTheme.colorScheme.onSecondaryContainer),
             CardData("Q", "♦️", MaterialTheme.colorScheme.onTertiaryContainer),
             CardData("J", "♣️", MaterialTheme.colorScheme.onPrimaryContainer)
         )
+        
         CardStack(cards = cards)
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = {
+                context.startActivity(Intent(context, XmlViewActivity::class.java))
+            }
+        ) {
+            Text("View XML Version")
+        }
     }
 }
 
@@ -222,7 +247,7 @@ fun AnimatedStackCard(
     
     Card(
         modifier = Modifier
-            .size(width = 200.dp, height = 280.dp)
+            .size(width = 100.dp, height = 160.dp)
             .offset { animatedOffset }
             .graphicsLayer {
                 rotationZ = animatedRotationZ
