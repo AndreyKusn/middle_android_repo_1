@@ -88,10 +88,20 @@ fun CardStack(cardCount: Int) {
     ) {
         // Create cards from bottom to top (reverse order for proper layering)
         for (i in cardCount - 1 downTo 0) {
+            // Natural fan rotation pattern like real cards held in hand
+            val baseRotation = when (i) {
+                0 -> 15f  // Top card: clockwise 15°
+                1 -> 3f   // Second card: clockwise 3°
+                2 -> -9f  // Third card: counterclockwise 9°
+                3 -> -21f // Fourth card: counterclockwise 21° (-9 + -12)
+                4 -> -33f // Fifth card: counterclockwise 33° (-21 + -12)
+                else -> -33f - (i - 4) * 12f // Continue pattern for more cards
+            }
+            
             AnimatedStackCard(
                 cardIndex = i,
                 isRotated = isRotated,
-                baseRotation = i * 12f // Each card rotated 12 degrees more for better fan effect
+                baseRotation = baseRotation
             )
         }
     }
@@ -118,12 +128,12 @@ fun AnimatedStackCard(
     val angleInRadians = Math.toRadians(baseRotation.toDouble())
     
     // Calculate position based on fan arc - cards spread out horizontally and slightly vertically
-    val offsetX = (fanRadius * Math.sin(angleInRadians) * 0.6).dp // Horizontal spread
-    val offsetY = (cardIndex * 8 - fanRadius * Math.cos(angleInRadians) * 0.3).dp // Vertical offset to show upper parts
+    val offsetX = -(fanRadius * Math.sin(angleInRadians) * 0.6).dp // Horizontal spread (negative for left side)
+    val offsetY = -(cardIndex * 12 + fanRadius * Math.cos(angleInRadians) * 0.2).dp // Negative Y to show upper parts of lower cards
     
     Card(
         modifier = Modifier
-            .size(width = 280.dp, height = 200.dp)
+            .size(width = 200.dp, height = 280.dp)
             .graphicsLayer {
                 rotationZ = animatedRotationZ
                 translationX = offsetX.toPx()
@@ -166,8 +176,6 @@ fun AnimatedStackCard(
                 },
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            
-            // Card suit - centered
             Text(
                 text = when (cardIndex % 4) {
                     0 -> "♠️"
