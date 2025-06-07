@@ -123,13 +123,13 @@ fun AnimatedStackCard(
         label = "card_rotation_$cardIndex"
     )
     
-    // Create fan effect like cards held in hand - expose upper portion of each card
-    val fanRadius = 120f // Radius of the fan arc
+    // Create fan effect like cards held in hand - pivot from bottom center
+    val pivotDistance = 100f // Distance from bottom pivot point to card center
     val angleInRadians = Math.toRadians(baseRotation.toDouble())
     
-    // Calculate position based on fan arc - cards spread out horizontally and slightly vertically
-    val offsetX = -(fanRadius * Math.sin(angleInRadians) * 0.6).dp // Horizontal spread (negative for left side)
-    val offsetY = -(cardIndex * 12 + fanRadius * Math.cos(angleInRadians) * 0.2).dp // Negative Y to show upper parts of lower cards
+    // Calculate position to create narrow bottom grip area and fanned top
+    val offsetX = -(pivotDistance * Math.sin(angleInRadians)).dp // Horizontal spread from pivot
+    val offsetY = -(cardIndex * 8).dp // Vertical stacking to show upper parts
     
     Card(
         modifier = Modifier
@@ -138,6 +138,7 @@ fun AnimatedStackCard(
                 rotationZ = animatedRotationZ
                 translationX = offsetX.toPx()
                 translationY = offsetY.toPx()
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.0f) // Rotate around bottom center
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
