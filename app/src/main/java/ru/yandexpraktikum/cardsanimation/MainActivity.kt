@@ -153,7 +153,7 @@ fun CardStack(cards: List<CardData>) {
         contentAlignment = Alignment.Center
     ) {
         // Create cards from bottom to top (reverse order for proper layering)
-        for (i in cardCount - 1 downTo 0) {
+срфтпув        for (i in 0 until cardCount) {
             // Calculate actual card index after cycling
             val actualCardIndex = (i + cardOffset) % cardCount
             val cardData = cards[actualCardIndex]

@@ -75,17 +75,6 @@ class AnimatedCardView @JvmOverloads constructor(
     }
 
     /**
-     * Set position with animation (like Compose animateIntOffsetAsState)
-     */
-    fun animateToPosition(x: Float, y: Float, duration: Long = 300) {
-        animate()
-            .x(x)
-            .y(y)
-            .setDuration(duration)
-            .start()
-    }
-
-    /**
      * Set card stack position (for layering like z-index)
      */
     fun setStackPosition(index: Int) {
