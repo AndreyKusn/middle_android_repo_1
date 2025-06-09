@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import ru.yandexpraktikum.cardsanimation.model.CardData
 
 @Composable
-fun CardStack(cards: List<CardData>) {
+fun AnimatedCardStack(cards: List<CardData>) {
     val cardCount = cards.size
     var isRotated by remember { mutableStateOf(false) }
     var currentCards by remember { mutableStateOf(cards) }
@@ -31,7 +31,7 @@ fun CardStack(cards: List<CardData>) {
                 0f
             }
 
-            AnimatedStackCard(
+            AnimatedCard(
                 cardIndex = i,
                 totalCards = cardCount,
                 isRotated = isRotated,
