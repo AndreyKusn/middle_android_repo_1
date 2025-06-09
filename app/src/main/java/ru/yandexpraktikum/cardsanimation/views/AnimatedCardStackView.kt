@@ -15,6 +15,8 @@ class AnimatedCardStackView @JvmOverloads constructor(
     private val cards = mutableListOf<AnimatedCardView>()
     private var cardDataList = listOf<CardData>()
 
+    private var isRotated = false
+
     init {
         setCards(
             listOf(
@@ -41,6 +43,8 @@ class AnimatedCardStackView @JvmOverloads constructor(
             cards.add(cardView)
             addView(cardView)
         }
+        // Возврат в исходное положение
+        isRotated = false
         updateCardPositions()
     }
 
