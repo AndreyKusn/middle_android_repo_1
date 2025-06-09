@@ -25,7 +25,6 @@ class AnimatedCardStackView @JvmOverloads constructor(
     private var cardOffset = 0
     private var isRotated = false
     private var dragOffsetY = 0f
-    private var accumulatedHorizontalMovement = 0f // Track cumulative horizontal movement
 
     // Gesture detector for handling swipes (like detectDragGestures in Compose)
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
@@ -120,7 +119,7 @@ class AnimatedCardStackView @JvmOverloads constructor(
     }
 
     /**
-     * Handle gesture movement (equivalent to handleVerticalSwipe and handleHorizontalSwipe)
+     * Simplified gesture movement handler for educational purposes
      */
     private fun handleGestureMovement(horizontalMovement: Float, verticalMovement: Float) {
         val isHorizontalSwipe = abs(horizontalMovement) > abs(verticalMovement)
@@ -128,36 +127,27 @@ class AnimatedCardStackView @JvmOverloads constructor(
         
         // Handle vertical swipes for fan animation
         if (isVerticalSwipe) {
-            handleVerticalSwipe(verticalMovement)
+            dragOffsetY += verticalMovement
         }
         
-        // Handle horizontal swipes for card cycling
+        // Handle horizontal swipes for card cycling (simplified)
         if (isHorizontalSwipe) {
             handleHorizontalSwipe(horizontalMovement)
         }
     }
 
     /**
-     * Handle vertical swipes (equivalent to Compose handleVerticalSwipe)
-     */
-    private fun handleVerticalSwipe(verticalMovement: Float) {
-        dragOffsetY += verticalMovement
-    }
-
-    /**
-     * Handle horizontal swipes (equivalent to Compose handleHorizontalSwipe)
+     * Simplified horizontal swipe handler for educational purposes
+     * Detects single swipe movements above threshold
      */
     private fun handleHorizontalSwipe(horizontalMovement: Float) {
-        // Accumulate horizontal movement like Compose version does
-        accumulatedHorizontalMovement += horizontalMovement
+        val swipeThreshold = 50f // Simple threshold for single swipe detection
         
-        val swipeThreshold = 30f
-        
-        if (abs(accumulatedHorizontalMovement) > swipeThreshold) {
+        // Check if single movement exceeds threshold
+        if (abs(horizontalMovement) > swipeThreshold) {
             // Both left and right swipes move bottom card to top
             cardOffset = if (cardOffset - 1 < 0) cardDataList.size - 1 else cardOffset - 1
             updateCardData()
-            accumulatedHorizontalMovement = 0f // Reset after triggering
         }
     }
 
@@ -173,7 +163,6 @@ class AnimatedCardStackView @JvmOverloads constructor(
         }
         
         dragOffsetY = 0f
-        accumulatedHorizontalMovement = 0f // Reset horizontal accumulation on gesture end
         updateCardPositions()
     }
 

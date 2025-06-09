@@ -105,30 +105,21 @@ fun handleVerticalSwipe(
 }
 
 /**
- * Handles horizontal finger movement for card cycling
- * Accumulates movement like the smooth XML View version
+ * Simplified horizontal swipe handler for educational purposes
+ * Detects single swipe movements above threshold
  */
 fun handleHorizontalSwipe(
     horizontalMovement: Float,
-    accumulatedHorizontalMovement: Float,
     currentCardOffset: Int,
     cardCount: Int,
-    onCardCycle: (Int) -> Unit,
-    onHorizontalAccumulate: (Float) -> Unit
+    onCardCycle: (Int) -> Unit
 ) {
-    // Accumulate horizontal movement for smoother detection
-    val newAccumulation = accumulatedHorizontalMovement + horizontalMovement
-    onHorizontalAccumulate(newAccumulation)
+    val swipeThreshold = 50f // Simple threshold for single swipe detection
 
-    val swipeThreshold = 30f // Same threshold as XML View
-
-    // Check if accumulated movement exceeds threshold
-    if (kotlin.math.abs(newAccumulation) > swipeThreshold) {
+    // Check if single movement exceeds threshold
+    if (kotlin.math.abs(horizontalMovement) > swipeThreshold) {
         // Both left and right swipes move bottom card to top
         val newOffset = if (currentCardOffset - 1 < 0) cardCount - 1 else currentCardOffset - 1
         onCardCycle(newOffset)
-
-        // Reset accumulation after triggering card cycle
-        onHorizontalAccumulate(0f)
     }
 }

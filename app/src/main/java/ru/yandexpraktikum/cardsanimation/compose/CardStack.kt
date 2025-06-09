@@ -20,8 +20,6 @@ fun CardStack(cards: List<CardData>) {
     var isRotated by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var cardOffset by remember { mutableIntStateOf(0) } // Track which card is on top
-    var accumulatedHorizontalMovement by remember { mutableFloatStateOf(0f) } // Track cumulative horizontal movement
-
     Box(
         modifier = Modifier
             .pointerInput(Unit) {
@@ -33,38 +31,28 @@ fun CardStack(cards: List<CardData>) {
                             onFanStateChange = { newFanState -> isRotated = newFanState }
                         )
                         dragOffset = 0f // Reset for next gesture
-                        accumulatedHorizontalMovement = 0f // Reset horizontal accumulation
                     }
                 ) { _, dragAmount ->
                     // This runs while user is dragging their finger
                     val horizontalMovement = dragAmount.x
                     val verticalMovement = dragAmount.y
 
-                    // Determine swipe direction
-                    val isHorizontalSwipe =
-                        kotlin.math.abs(horizontalMovement) > kotlin.math.abs(verticalMovement)
-                    val isVerticalSwipe =
-                        kotlin.math.abs(verticalMovement) > kotlin.math.abs(horizontalMovement)
+                    // Simple gesture detection for educational purposes
+                    val isHorizontalSwipe = kotlin.math.abs(horizontalMovement) > kotlin.math.abs(verticalMovement)
+                    val isVerticalSwipe = kotlin.math.abs(verticalMovement) > kotlin.math.abs(horizontalMovement)
 
-                    // Only handle vertical swipes for fan animation
+                    // Handle vertical swipes for fan animation
                     if (isVerticalSwipe) {
-                        handleVerticalSwipe(
-                            verticalMovement = verticalMovement,
-                            onVerticalDrag = { verticalDistance -> dragOffset += verticalDistance }
-                        )
+                        dragOffset += verticalMovement
                     }
 
-                    // Only handle horizontal swipes for card cycling
+                    // Handle horizontal swipes for card cycling (simplified)
                     if (isHorizontalSwipe) {
                         handleHorizontalSwipe(
                             horizontalMovement = horizontalMovement,
-                            accumulatedHorizontalMovement = accumulatedHorizontalMovement,
                             currentCardOffset = cardOffset,
                             cardCount = cardCount,
-                            onCardCycle = { newCardOffset -> cardOffset = newCardOffset },
-                            onHorizontalAccumulate = { newAccumulation ->
-                                accumulatedHorizontalMovement = newAccumulation
-                            }
+                            onCardCycle = { newCardOffset -> cardOffset = newCardOffset }
                         )
                     }
                 }
