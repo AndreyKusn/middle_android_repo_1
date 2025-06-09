@@ -14,6 +14,7 @@ import ru.yandexpraktikum.cardsanimation.model.CardData
 fun CardStack(cards: List<CardData>) {
     val cardCount = cards.size
     var isRotated by remember { mutableStateOf(false) }
+    var currentCards by remember { mutableStateOf(cards) }
 
     Box(
         modifier = Modifier,
@@ -21,7 +22,7 @@ fun CardStack(cards: List<CardData>) {
     ) {
         // Отрисовка колоды карт в исходной позиции
         for (i in 0 until cardCount) {
-            val cardData = cards[i]
+            val cardData = currentCards[i]
 
             val baseRotation = if (cardCount > 1) {
                 val angleStep = 45f / (cardCount - 1)
