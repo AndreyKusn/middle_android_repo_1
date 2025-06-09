@@ -5,10 +5,9 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat
 import ru.yandexpraktikum.cardsanimation.R
+import ru.yandexpraktikum.cardsanimation.model.CardData
 import kotlin.math.abs
-import kotlin.math.sin
 
 /**
  * Animated card stack view - equivalent to CardStack composable
@@ -21,16 +20,12 @@ class AnimatedCardStackView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val cards = mutableListOf<AnimatedCardView>()
-    private val cardDataList = listOf(
-        CardData("A", "♠️", R.color.card_background_1, R.color.card_text_dark),
-        CardData("K", "♥️", R.color.card_background_2, R.color.card_text_dark),
-        CardData("Q", "♦️", R.color.card_background_3, R.color.card_text_dark),
-        CardData("J", "♣️", R.color.card_background_4, R.color.card_text_dark)
-    )
+    private var cardDataList = listOf<CardData>() // Now mutable and empty by default
 
     private var cardOffset = 0
     private var isRotated = false
     private var dragOffsetY = 0f
+    private var accumulatedHorizontalMovement = 0f // Track cumulative horizontal movement
 
     // Gesture detector for handling swipes (like detectDragGestures in Compose)
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
@@ -55,14 +50,21 @@ class AnimatedCardStackView @JvmOverloads constructor(
             velocityX: Float,
             velocityY: Float
         ): Boolean {
-            // Handle fling end (like onDragEnd in Compose)
             handleGestureEnd()
             return true
         }
     })
 
     init {
-        setupCards()
+        // Set default cards if none provided
+        if (cardDataList.isEmpty()) {
+            setCards(listOf(
+                CardData(R.drawable.card_clover),
+                CardData(R.drawable.card_hearts),
+                CardData(R.drawable.card_spades),
+                CardData(R.drawable.card_diamond)
+            ))
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -77,9 +79,21 @@ class AnimatedCardStackView @JvmOverloads constructor(
     }
 
     /**
+     * Set cards dynamically and refresh the stack
+     */
+    fun setCards(newCardDataList: List<CardData>) {
+        cardDataList = newCardDataList
+        setupCards()
+    }
+
+    /**
      * Setup initial cards in the stack
      */
     private fun setupCards() {
+        // Clear existing cards
+        clearCards()
+        
+        // Create new cards
         cardDataList.forEachIndexed { index, cardData ->
             val cardView = AnimatedCardView(context).apply {
                 setCardData(cardData)
@@ -89,8 +103,20 @@ class AnimatedCardStackView @JvmOverloads constructor(
             addView(cardView)
         }
         
+        // Reset state
+        cardOffset = 0
+        isRotated = false
+        
         // Position cards in initial fan arrangement
         updateCardPositions()
+    }
+
+    /**
+     * Clear all cards from the stack
+     */
+    private fun clearCards() {
+        cards.clear()
+        removeAllViews()
     }
 
     /**
@@ -122,17 +148,16 @@ class AnimatedCardStackView @JvmOverloads constructor(
      * Handle horizontal swipes (equivalent to Compose handleHorizontalSwipe)
      */
     private fun handleHorizontalSwipe(horizontalMovement: Float) {
+        // Accumulate horizontal movement like Compose version does
+        accumulatedHorizontalMovement += horizontalMovement
+        
         val swipeThreshold = 30f
         
-        if (abs(horizontalMovement) > swipeThreshold) {
-            if (horizontalMovement > 0) {
-                // Swipe right: move bottom card to top
-                cardOffset = (cardOffset + 1) % cardDataList.size
-            } else {
-                // Swipe left: move top card to bottom
-                cardOffset = if (cardOffset - 1 < 0) cardDataList.size - 1 else cardOffset - 1
-            }
+        if (abs(accumulatedHorizontalMovement) > swipeThreshold) {
+            // Both left and right swipes move bottom card to top
+            cardOffset = if (cardOffset - 1 < 0) cardDataList.size - 1 else cardOffset - 1
             updateCardData()
+            accumulatedHorizontalMovement = 0f // Reset after triggering
         }
     }
 
@@ -148,6 +173,7 @@ class AnimatedCardStackView @JvmOverloads constructor(
         }
         
         dragOffsetY = 0f
+        accumulatedHorizontalMovement = 0f // Reset horizontal accumulation on gesture end
         updateCardPositions()
     }
 

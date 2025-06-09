@@ -7,44 +7,12 @@
     app:cardElevation="8dp"
     app:cardBackgroundColor="@color/card_background_1">
 
-    <LinearLayout
+    <!-- Card Image -->
+    <ImageView
+        android:id="@+id/cardImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="12dp">
-
-        <!-- Card Rank -->
-        <TextView
-            android:id="@+id/cardRank"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="A"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/card_text_dark"
-            android:layout_marginBottom="4dp" />
-
-        <!-- Card Suit -->
-        <TextView
-            android:id="@+id/cardSuit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="♠️"
-            android:textSize="24sp"
-            android:layout_marginBottom="6dp" />
-
-        <!-- Rotation Info (for debugging) -->
-        <TextView
-            android:id="@+id/rotationInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0°"
-            android:textSize="8sp"
-            android:textColor="@color/primary_light"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
-
-    </LinearLayout>
+        android:scaleType="centerCrop"
+        android:contentDescription="Playing card" />
 
 </androidx.cardview.widget.CardView> 

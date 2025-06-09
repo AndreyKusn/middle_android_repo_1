@@ -5,10 +5,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import android.widget.TextView
+import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import ru.yandexpraktikum.cardsanimation.R
+import ru.yandexpraktikum.cardsanimation.model.CardData
 
 /**
  * Individual animated card view - equivalent to AnimatedStackCard in Compose
@@ -20,9 +21,7 @@ class AnimatedCardView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val cardView: CardView
-    private val rankTextView: TextView
-    private val suitTextView: TextView
-    private val rotationInfoTextView: TextView
+    private val cardImageView: ImageView
 
     private var currentRotation = 0f
     private var rotationAnimator: ObjectAnimator? = null
@@ -32,9 +31,7 @@ class AnimatedCardView @JvmOverloads constructor(
         LayoutInflater.from(context).inflate(R.layout.card_view, this, true)
         
         cardView = this.getChildAt(0) as CardView
-        rankTextView = findViewById(R.id.cardRank)
-        suitTextView = findViewById(R.id.cardSuit)
-        rotationInfoTextView = findViewById(R.id.rotationInfo)
+        cardImageView = findViewById(R.id.cardImage)
 
         // Set transform origin to bottom center (like Compose version)
         pivotX = width / 2f
@@ -52,10 +49,7 @@ class AnimatedCardView @JvmOverloads constructor(
      * Set card data and update the UI
      */
     fun setCardData(cardData: CardData) {
-        rankTextView.text = cardData.rank
-        suitTextView.text = cardData.suit
-        rankTextView.setTextColor(ContextCompat.getColor(context, cardData.textColor))
-        cardView.setCardBackgroundColor(ContextCompat.getColor(context, cardData.backgroundColor))
+        cardImageView.setImageResource(cardData.imageResId)
     }
 
     /**
@@ -68,7 +62,6 @@ class AnimatedCardView @JvmOverloads constructor(
             this.duration = duration
             addUpdateListener { 
                 currentRotation = rotation
-                rotationInfoTextView.text = "${currentRotation.toInt()}°"
             }
             start()
         }

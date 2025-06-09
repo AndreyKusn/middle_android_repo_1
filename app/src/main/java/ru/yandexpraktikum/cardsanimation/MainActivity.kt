@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,21 +33,18 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import ru.yandexpraktikum.cardsanimation.model.CardData
 import ru.yandexpraktikum.cardsanimation.ui.theme.CardsAnimationTheme
-
-// Card data structure
-data class CardData(
-    val rank: String,
-    val suit: String,
-    val color: androidx.compose.ui.graphics.Color
-)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,17 +72,17 @@ fun AnimatedCardScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Compose Version",
+            text = stringResource(R.string.jetpack_compose_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
         val cards = listOf(
-            CardData("A", "♠️", MaterialTheme.colorScheme.onPrimaryContainer),
-            CardData("K", "♥️", MaterialTheme.colorScheme.onSecondaryContainer),
-            CardData("Q", "♦️", MaterialTheme.colorScheme.onTertiaryContainer),
-            CardData("J", "♣️", MaterialTheme.colorScheme.onPrimaryContainer)
+            CardData(R.drawable.card_clover),
+            CardData(R.drawable.card_hearts),
+            CardData(R.drawable.card_spades),
+            CardData(R.drawable.card_diamond)
         )
         
         CardStack(cards = cards)
@@ -98,7 +94,7 @@ fun AnimatedCardScreen(modifier: Modifier = Modifier) {
                 context.startActivity(Intent(context, XmlViewActivity::class.java))
             }
         ) {
-            Text("View XML Version")
+            Text("Просмотреть версию на XML View")
         }
     }
 }
@@ -109,6 +105,7 @@ fun CardStack(cards: List<CardData>) {
     var isRotated by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var cardOffset by remember { mutableIntStateOf(0) } // Track which card is on top
+    var accumulatedHorizontalMovement by remember { mutableFloatStateOf(0f) } // Track cumulative horizontal movement
     
     Box(
         modifier = Modifier
@@ -121,6 +118,7 @@ fun CardStack(cards: List<CardData>) {
                             onFanStateChange = { newFanState -> isRotated = newFanState }
                         )
                         dragOffset = 0f // Reset for next gesture
+                        accumulatedHorizontalMovement = 0f // Reset horizontal accumulation
                     }
                 ) { _, dragAmount ->
                     // This runs while user is dragging their finger
@@ -143,9 +141,11 @@ fun CardStack(cards: List<CardData>) {
                     if (isHorizontalSwipe) {
                         handleHorizontalSwipe(
                             horizontalMovement = horizontalMovement,
+                            accumulatedHorizontalMovement = accumulatedHorizontalMovement,
                             currentCardOffset = cardOffset,
                             cardCount = cardCount,
-                            onCardCycle = { newCardOffset -> cardOffset = newCardOffset }
+                            onCardCycle = { newCardOffset -> cardOffset = newCardOffset },
+                            onHorizontalAccumulate = { newAccumulation -> accumulatedHorizontalMovement = newAccumulation }
                         )
                     }
                 }
@@ -171,38 +171,9 @@ fun CardStack(cards: List<CardData>) {
                 totalCards = cardCount,
                 isRotated = isRotated,
                 baseRotation = baseRotation,
-                cardContent = {
-                    PlayingCard(cardData = cardData)
-                }
+                cardData = cardData
             )
         }
-    }
-}
-
-@Composable
-fun PlayingCard(cardData: CardData) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Card rank/number - positioned at top for visibility in fan
-        Text(
-            text = cardData.rank,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = cardData.color,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        // Card suit - centered
-        Text(
-            text = cardData.suit,
-            fontSize = 40.sp,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
     }
 }
 
@@ -210,9 +181,9 @@ fun PlayingCard(cardData: CardData) {
 fun AnimatedStackCard(
     cardIndex: Int,
     totalCards: Int,
+    cardData: CardData,
     isRotated: Boolean,
-    baseRotation: Float,
-    cardContent: @Composable () -> Unit
+    baseRotation: Float
 ) {
     // Calculate final rotation: base rotation or dramatic fan spread when swiped
     val targetRotation = if (isRotated) {
@@ -230,7 +201,6 @@ fun AnimatedStackCard(
         label = "card_rotation_$cardIndex"
     )
     
-    // All cards positioned at the same location - rotation creates the fan (like View version)
     val animatedOffset by animateIntOffsetAsState(
         targetValue = IntOffset(0, 0), // All cards at center position
         animationSpec = tween(durationMillis = 300),
@@ -243,44 +213,24 @@ fun AnimatedStackCard(
             .offset { animatedOffset }
             .graphicsLayer {
                 rotationZ = animatedRotationZ
-                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.0f) // Rotate around bottom center
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(
+                    0.5f,
+                    1.0f
+                ) // Rotate around bottom center
             },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = when (cardIndex % 3) {
-                0 -> MaterialTheme.colorScheme.primaryContainer
-                1 -> MaterialTheme.colorScheme.secondaryContainer
-                else -> MaterialTheme.colorScheme.tertiaryContainer
-            }
-        ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = (4 + cardIndex * 1).dp // Subtle elevation increase
+            defaultElevation = (4 + cardIndex * 1).dp
         )
     ) {
-        // Use the provided card content
-        cardContent()
-        
-        // Optional: Add rotation info overlay
-        Box(
+        Image(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Text(
-                text = "${animatedRotationZ.toInt()}°",
-                fontSize = 10.sp,
-                color = when (cardIndex % 3) {
-                    0 -> MaterialTheme.colorScheme.primary
-                    1 -> MaterialTheme.colorScheme.secondary
-                    else -> MaterialTheme.colorScheme.tertiary
-                },
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
+            painter = painterResource(cardData.imageResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
     }
 }
-
-// Simplified gesture helper functions (like View gesture detectors!)
 
 /**
  * Handles what happens when user lifts their finger (like onFling in View)
@@ -295,7 +245,6 @@ fun handleDragEnd(
     when {
         verticalDragDistance < -threshold -> onFanStateChange(true)  // Swiped up = fan out
         verticalDragDistance > threshold -> onFanStateChange(false)  // Swiped down = fold back
-        // else -> do nothing (small movement, keep current state)
     }
 }
 
@@ -314,44 +263,29 @@ fun handleVerticalSwipe(
 
 /**
  * Handles horizontal finger movement for card cycling
- * Simple horizontal-only detection (like checking X movement in View)
+ * Accumulates movement like the smooth XML View version
  */
 fun handleHorizontalSwipe(
     horizontalMovement: Float,
+    accumulatedHorizontalMovement: Float,
     currentCardOffset: Int,
     cardCount: Int,
-    onCardCycle: (Int) -> Unit
+    onCardCycle: (Int) -> Unit,
+    onHorizontalAccumulate: (Float) -> Unit
 ) {
-    val swipeThreshold = 30f // Increased threshold to avoid accidental triggers
+    // Accumulate horizontal movement for smoother detection
+    val newAccumulation = accumulatedHorizontalMovement + horizontalMovement
+    onHorizontalAccumulate(newAccumulation)
     
-    // Simple check: is horizontal movement significant enough?
-    if (kotlin.math.abs(horizontalMovement) > swipeThreshold) {
-        if (horizontalMovement > 0) {
-            // Swipe right = move bottom card to top (like flipping through deck)
-            val newOffset = (currentCardOffset + 1) % cardCount
-            onCardCycle(newOffset)
-        } else {
-            // Swipe left = move top card to bottom (reverse direction)
-            val newOffset = if (currentCardOffset - 1 < 0) cardCount - 1 else currentCardOffset - 1
-            onCardCycle(newOffset)
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AnimatedCardPreview() {
-    CardsAnimationTheme {
-        AnimatedCardScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PlayingCardPreview() {
-    CardsAnimationTheme {
-        PlayingCard(
-            cardData = CardData("A", "♠️", MaterialTheme.colorScheme.onPrimaryContainer)
-        )
+    val swipeThreshold = 30f // Same threshold as XML View
+    
+    // Check if accumulated movement exceeds threshold
+    if (kotlin.math.abs(newAccumulation) > swipeThreshold) {
+        // Both left and right swipes move bottom card to top
+        val newOffset = if (currentCardOffset - 1 < 0) cardCount - 1 else currentCardOffset - 1
+        onCardCycle(newOffset)
+        
+        // Reset accumulation after triggering card cycle
+        onHorizontalAccumulate(0f)
     }
 }

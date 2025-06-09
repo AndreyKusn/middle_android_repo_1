@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CardsAnimation</string>
+    <string name="xml_view_title">XML View</string>
+    <string name="jetpack_compose_title">Jetpack Compose</string>
 </resources>
