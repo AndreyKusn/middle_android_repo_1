@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ru.yandexpraktikum.cardsanimation.model.CardData
-import kotlin.reflect.KProperty
 
 @Composable
 fun CardStack(cards: List<CardData>) {
