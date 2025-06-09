@@ -61,6 +61,8 @@ class AnimatedCardStackView @JvmOverloads constructor(
                 0f
             }
 
+            // Сейчас финальное состояние колоды равно исходному
+            // (но должно быть изменено, чтобы отобразить эффект раскрытия)
             val targetRotation = baseRotation
 
             val cardWidth = 100f * resources.displayMetrics.density
@@ -73,7 +75,7 @@ class AnimatedCardStackView @JvmOverloads constructor(
 
             cardView.pivotX = cardWidth / 2f
             cardView.pivotY = cardHeight
-            cardView.rotation = targetRotation
+            cardView.animateToRotation(targetRotation)
         }
     }
 
