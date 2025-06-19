@@ -30,6 +30,8 @@ class AnimatedCardStackView @JvmOverloads constructor(
             cards.add(cardView)
             addView(cardView)
         }
+        // Возврат в исходное положение
+        isRotated = false
         updateCardPositions()
     }
 
