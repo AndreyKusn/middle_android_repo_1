@@ -1,6 +1,5 @@
 package ru.yandexpraktikum.cardsanimation.views
 
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -16,15 +15,12 @@ class AnimatedCardView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val cardView: CardView
+    val cardView: CardView
     private val cardImageView: ImageView
-
-    private var currentRotation = 0f
-    private var rotationAnimator: ObjectAnimator? = null
 
     init {
         LayoutInflater.from(context).inflate(R.layout.card_view, this, true)
-        
+
         cardView = this.getChildAt(0) as CardView
         cardImageView = findViewById(R.id.cardImage)
 
@@ -42,19 +38,22 @@ class AnimatedCardView @JvmOverloads constructor(
         cardImageView.setImageResource(cardData.imageResId)
     }
 
-    fun animateToRotation(targetRotation: Float, duration: Long = 300) {
-        rotationAnimator?.cancel()
-        
-        rotationAnimator = ObjectAnimator.ofFloat(this, "rotation", rotation, targetRotation).apply {
-            this.duration = duration
-            addUpdateListener { 
-                currentRotation = rotation
-            }
-            start()
-        }
-    }
-
     fun setStackPosition(index: Int) {
         cardView.cardElevation = (4 + index * 1).toFloat() * resources.displayMetrics.density
     }
+
+    // TODO: Добавьте методы для анимации
+    // Подсказка: используйте ObjectAnimator для плавной анимации
+
+    // TODO: Добавьте метод для анимации поворота карты (чтобы был плавный эффект раскрытия/закрытия колоды)
+    // fun animateToRotation(targetRotation: Float, duration: Long = 300) { ... }
+
+    // TODO: Добавьте метод для анимации перетасовки карт (первым шагом нижняя карта двигается вправо)
+    // fun moveCardRight(onComplete: (() -> Unit)? = null) { ... }
+
+    // TODO: Добавьте метод для анимации выдвижения нижней карты наверх
+    // fun moveCardToTop(onComplete: (() -> Unit)? = null) { ... }
+
+    // TODO: Добавьте анимацию перемещения всей колоды карты в желаемую позицию
+    // fun adjustToFinalPosition(finalRotation: Float, finalZOrder: Int, onComplete: (() -> Unit)? = null) { ... }
 } 

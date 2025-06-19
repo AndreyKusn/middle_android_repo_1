@@ -3,7 +3,6 @@ package ru.yandexpraktikum.cardsanimation.views
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import ru.yandexpraktikum.cardsanimation.R
 import ru.yandexpraktikum.cardsanimation.model.CardData
 
 class AnimatedCardStackView @JvmOverloads constructor(
@@ -12,21 +11,9 @@ class AnimatedCardStackView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private var cardDataList: List<CardData> = emptyList()
     private val cards = mutableListOf<AnimatedCardView>()
-    private var cardDataList = listOf<CardData>()
-
     private var isRotated = false
-
-    init {
-        setCards(
-            listOf(
-                CardData(R.drawable.card_clover),
-                CardData(R.drawable.card_hearts),
-                CardData(R.drawable.card_spades),
-                CardData(R.drawable.card_diamond)
-            )
-        )
-    }
 
     fun setCards(newCardDataList: List<CardData>) {
         cardDataList = newCardDataList
@@ -43,8 +30,6 @@ class AnimatedCardStackView @JvmOverloads constructor(
             cards.add(cardView)
             addView(cardView)
         }
-        // Возврат в исходное положение
-        isRotated = false
         updateCardPositions()
     }
 
@@ -65,9 +50,13 @@ class AnimatedCardStackView @JvmOverloads constructor(
                 0f
             }
 
-            // Сейчас финальное состояние колоды равно исходному
-            // (но должно быть изменено, чтобы отобразить эффект раскрытия)
-            val targetRotation = baseRotation
+            // Расчёт финальной позиции (для эффекта раскрытой колоды карт)
+            val targetRotation = if (isRotated) {
+                val angleStep = if (cardCount > 1) 180f / (cardCount - 1) else 0f
+                90f - (index * angleStep)
+            } else {
+                baseRotation
+            }
 
             val cardWidth = 100f * resources.displayMetrics.density
             val cardHeight = 160f * resources.displayMetrics.density
@@ -79,7 +68,9 @@ class AnimatedCardStackView @JvmOverloads constructor(
 
             cardView.pivotX = cardWidth / 2f
             cardView.pivotY = cardHeight
-            cardView.animateToRotation(targetRotation)
+
+            // TODO: Замените на метод, который анимирует движение карты
+            cardView.rotation = targetRotation
         }
     }
 
@@ -89,4 +80,11 @@ class AnimatedCardStackView @JvmOverloads constructor(
             updateCardPositions()
         }
     }
+
+    // TODO: Добавьте обработку жестов
+    // Hint: Используйте GestureDetector с методом onFling для обработки свайпов
+
+    // TODO: Добавьте обработку вертикальных свайпов (вверх/вниз)
+
+    // TODO: Добавьте обработку горизонтальных свайпов (влево/вправо)
 }
