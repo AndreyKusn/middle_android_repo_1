@@ -24,9 +24,6 @@ fun AnimatedCard(
     // TODO: Добавьте анимацию поворота карты
     // Подсказка: используйте animateFloatAsState для плавной анимации
 
-    // Здесь хранится высота карты (чем ближе к концу списка, тем выше она должна выглядеть)
-    val cardElevation = (4 + cardIndex).dp
-
     Card(
         modifier = Modifier
             .size(width = 100.dp, height = 160.dp)
@@ -37,8 +34,7 @@ fun AnimatedCard(
             },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = cardElevation
-            // TODO: Добавьте анимацию высоты карты
+            defaultElevation = (4 + cardIndex).dp
         )
     ) {
         Image(
