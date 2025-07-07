@@ -85,6 +85,10 @@ class AnimatedCardStackView @JvmOverloads constructor(
 
     private fun startCardSwapAnimation(bottomCard: AnimatedCardView) {
         // TODO: [Задание 5] Добавьте анимацию перетасовки карт
+        // На данном этапе просто быстро двигаем нижнюю карту наверх
+        val reorderedCards = cardDataList.drop(1) + cardDataList.first()
+        cardDataList = reorderedCards
+        setupCards()
     }
 
     // TODO: [Задание 2] Добавьте обработку жестов

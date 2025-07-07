@@ -56,3 +56,8 @@ fun AnimatedCardStack(cards: List<CardData>) {
         }
     }
 }
+
+// Простая функция перестановки карт
+fun reorderCards(cards: List<CardData>): List<CardData> {
+    return cards.drop(1) + cards.first()
+}
