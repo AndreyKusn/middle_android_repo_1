@@ -71,7 +71,7 @@ class AnimatedCardStackView @JvmOverloads constructor(
             cardView.pivotX = cardWidth / 2f
             cardView.pivotY = cardHeight
 
-            // TODO: Замените на метод, который анимирует движение карты
+            // TODO: [Задание 1] Замените на метод, который анимирует движение карты
             cardView.rotation = targetRotation
         }
     }
@@ -83,10 +83,14 @@ class AnimatedCardStackView @JvmOverloads constructor(
         }
     }
 
-    // TODO: Добавьте обработку жестов
-    // Hint: Используйте GestureDetector с методом onFling для обработки свайпов
+    private fun startCardSwapAnimation(bottomCard: AnimatedCardView) {
+        // TODO: [Задание 5] Добавьте анимацию перетасовки карт
+    }
 
-    // TODO: Добавьте обработку вертикальных свайпов (вверх/вниз)
+    // TODO: [Задание 2] Добавьте обработку жестов
+    // Подсказка: Используйте GestureDetector с методом onFling для обработки свайпов
 
-    // TODO: Добавьте обработку горизонтальных свайпов (влево/вправо)
+    // TODO: [Задание 3] Добавьте обработку вертикальных свайпов (вверх/вниз)
+
+    // TODO: [Задание 4] Добавьте обработку горизонтальных свайпов (влево/вправо)
 }

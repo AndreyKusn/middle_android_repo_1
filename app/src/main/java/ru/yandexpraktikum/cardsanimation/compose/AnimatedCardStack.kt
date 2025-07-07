@@ -35,7 +35,7 @@ fun AnimatedCardStack(cards: List<CardData>) {
     val cardCount = cards.size
     var isRotated by remember { mutableStateOf(false) }
 
-    // TODO: Добавьте обработку жестов
+    // TODO: [Задание 2] Добавьте обработку жестов
     // Подсказка: Используйте Modifier.pointerInput() с методом detectDragGestures()
 
     Box(
@@ -50,7 +50,7 @@ fun AnimatedCardStack(cards: List<CardData>) {
                     cardIndex = i,
                     targetRotation = targetRotation,
                     cardData = cardData
-                    // TODO: Здесь добавьте параметры анимации карты
+                    // TODO: [Задание 5] Здесь добавьте параметры анимации карты
                 )
             }
         }

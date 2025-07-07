@@ -21,13 +21,13 @@ fun AnimatedCard(
     cardData: CardData,
     targetRotation: Float
 ) {
-    // TODO: Добавьте анимацию поворота карты
+    // TODO: [Задание 1] Добавьте анимацию поворота карты
     // Подсказка: используйте animateFloatAsState для плавной анимации
 
     Card(
         modifier = Modifier
             .size(width = 100.dp, height = 160.dp)
-            // TODO: Добавьте анимацию карты при свайпе вправо или влево
+            // TODO: [Задание 5] Добавьте анимацию карты при свайпе вправо или влево
             .graphicsLayer {
                 rotationZ = targetRotation
                 transformOrigin = TransformOrigin(0.5f, 1.0f)
